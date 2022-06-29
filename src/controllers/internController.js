@@ -68,4 +68,22 @@ const createintern = async function (req, res) {
     }
 }
 
-module.exports = { createintern }
+const getInternswithcollege = async function(req, res){
+    let requestedQuery = req.query
+    let collegename = await collegeModel.findOne(requestedQuery).select({name:1,fullName:1,logolink:1})
+    let collegeandintern= await internModel.find({collegeId: collegename._id}).select({_id:1,name:1,email:1,mobile:1})
+    
+    let fulldata = {
+          name: collegename.name,
+          fullName: collegename.fullName,
+          logolink: collegename.logoLink,
+          intern: collegeandintern
+    }
+
+    res.status(200).send({status: true, data: fulldata})
+
+
+
+}
+
+module.exports = { createintern, getInternswithcollege}
