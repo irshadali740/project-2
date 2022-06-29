@@ -7,7 +7,7 @@ router.post("/functionup/colleges", collegeController.createCollege)
 
 router.post("/functionup/interns",internController.createintern)
 
-router.get("/functionup/collegeDetails",internController.getInternswithcollege)
+router.get("/functionup/collegeDetails",internController.getInterns)
 
 
 
