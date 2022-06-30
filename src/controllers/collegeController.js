@@ -20,17 +20,17 @@ const createCollege = async function (req, res) {
     let college = req.body 
       //<------Checking Whether Request Body is empty or not----------->//
     if(!(college.name && college.fullName &&college.logoLink) ){
-        return res.status(400).send({status : false, msg : "All fields are mandatory."})
+        return res.status(400).send({status : false, message : "All fields are mandatory."})
     }
     
      //<-------Validation of  Name----------->//
      if(!valid(college.name)) return res.status(400).send({ status: false, message: "Please Use Alphabets in  name" })
      let name=/^[A-Za-z ]+$/.test(college.name.trim())
-     if(!name) return res.status(400).send({status : false, msg : "Please Use Alphabets in name"})
+     if(!name) return res.status(400).send({status : false, message : "Please Use Alphabets in name"})
       //<-------Validation of name----------->//
       let nameValidation = college.name
       let duplicate = await collegeModel.findOne({name: nameValidation})
-      if(duplicate) return res.status(400).send({status: false, msg : "Name Already Exist."}) 
+      if(duplicate) return res.status(400).send({status: false, message : "Name Already Exist."}) 
       //<-------Validation of fullName----------->//
     if (!valid(college.fullName)) return res.status(400).send({ status: false, message: "Please Use Alphabets in fullName"})
     name=/^[A-Za-z &]+$/.test(college.fullName)
@@ -47,7 +47,7 @@ const createCollege = async function (req, res) {
     res.status(201).send({ status : true , data: collegeCreated })
    
     } catch (err) {
-        return res.status(500).send({ msg: err.message })
+        return res.status(500).send({ message: err.message })
     }
 }
 
