@@ -18,7 +18,7 @@ const createCollege = async function (req, res) {
 
     try {
         let college = req.body
-        //<------Checking Whether Request Body is empty or not----------->//
+        //<------Checking Whether Request Body is empty or not----------->//0
         if (!(college.name && college.fullName && college.logoLink)) {
             return res.status(400).send({ status: false, msg: "All fields are mandatory." })
         }
