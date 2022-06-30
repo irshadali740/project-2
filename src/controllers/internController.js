@@ -24,90 +24,109 @@ let isValidMobile = function (number) {
 const createintern = async function (req, res) {
     try {
         let data = req.body
-        let collegeName = req.body.collegeName
 
+//<------Checking Whether Request Body is empty or not----------->//
+if(!(data.name && data.email && data.mobile) ){
+    return res.status(400).send({status : false, message : "All fields are mandatory."})
+}
+
+        //----------------------------------------//
         if (Object.keys(data).length <= 0)
-            return res.status(400).send({ status: false, msg: "please provide data" })
+            return res.status(400).send({ status: false, message: "please provide data" })
 
-        if (!data.name)
-            return res.status(400).send({ status: false, msg: "please provide name" })
+        let collegeName = req.body.collegeName
+        if(!collegeName) return res.status(400).send({status : false, message : "Please provide the college name"})
+        let Validation=/^[A-Za-z ]+$/.test(collegeName.trim())
+        if(!Validation) return res.status(400).send({status : false, message : "Please Use Alphabets in college name"})
+       
+        collegeName.toLowerCase();
+
+         if (!data.name)
+            return res.status(400).send({ status: false, message: "please provide name" })
+            let Valid=/^[A-Za-z ]+$/.test(data.name.trim())
+            if(!Valid) return res.status(400).send({status : false, message : "Please Use Alphabets in name"})
+           
         if (!isvalid(data.name))
-            return res.status(400).send({ status: false, msg: "please provide alphabetic character" })
+            return res.status(400).send({ status: false, message: "please provide alphabetic character" })
 
         if (!data.email)
-            return res.status(400).send({ status: false, msg: "please provide email" })
+            return res.status(400).send({ status: false, message: "please provide email" })
         if (!validator.isEmail(data.email))
-            return res.status(400).send({ status: false, msg: "please input proper format - eg'name@gmail.com'" })
+            return res.status(400).send({ status: false, message: "please input proper format - eg'name@gmail.com'" })
 
         let emailCheck = await internModel.findOne({ email: data.email })
         if (emailCheck)
-            return res.status(400).send({ status: false, msg: "This email-Id is already use" })
+            return res.status(400).send({ status: false, message: "This email-Id is already use" })
 
         if (!data.mobile)
-            return res.status(400).send({ status: false, msg: "please provide mobile" })
+            return res.status(400).send({ status: false, message: "please provide mobile" })
         if (!isValidMobile(data.mobile))
-            return res.status(400).send({ status: false, msg: "please input 10 digit number" })
+            return res.status(400).send({ status: false, message: "please input 10 digit number" })
         let mobileNumberCheck = await internModel.findOne({ mobile: data.mobile })
         if (mobileNumberCheck)
-            return res.status(400).send({ status: false, msg: "Mobile number already use" })
+            return res.status(400).send({ status: false, message: "Mobile number already use" })
 
             
         let collegeNamecheck = await collegeModel.findOne({ name: collegeName })
        
         if (!collegeNamecheck)
-            return res.status(400).send({ status: false, msg: "college name does't exits" })
+            return res.status(400).send({ status: false, message: "college name does't exits" })
 
         let collegedata = collegeNamecheck._id;
-        // let Objectid = mongoose.Types.ObjectId(collegedata)
-        // console.log(Objectid );
+
         data.collegeId =  collegedata
         
         let saveData = await internModel.create(data)
-      console.log(saveData );
+     
         res.status(201).send({ status: true, data: saveData })
     }
     catch (error) {
         console.log(error.message)
-        res.status(500).send({ status: false, msg: error.message })
+        res.status(500).send({ status: false, message: error.message })
 
     }
 }
 
-const getInterns = async function (req, res) {
-    try {
-        let query = req.query.name.toLowerCase();
-        if(!query) return res.status(400).send({status : false, msg : "Please provide the college name"})
-       //if(!isvalid(query)) return res.status(400).send({ status: false, message: "Please Use Alphabets in  name" })
-        let Validation=/^[A-Za-z ]+$/.test(query.trim())
-        if(!Validation) return res.status(400).send({status : false, msg : "Please Use Alphabets in name"})
-       
-       let getDetails = await collegeModel.findOne({name:query}).select({name:1,fullName:1,logoLink:1,_id:1})
-       if(!getDetails) return res.status(400).send({status : false, msg : "No such college found"})
-       
-       let collegeId=getDetails._id
+const  getInterns = async function (req, res){
+try {
+   
     
-      
-       let internDetails = await internModel.find({collegeId:collegeId}).select({name:1,email:1,mobile:1})
-       if(internDetails.length==0) return res.status(400).send({status : false, msg : `no interns found in ${query}`})
-        let name = getDetails.name;
-        let fullName = getDetails.fullName;
-        let logoLink = getDetails.logoLink;
+    let query = req.query.collegeName
+     if(!query) return res.status(400).send({status : false, message : "Please provide the college name"})
+      query.toLowerCase();
+    
+     let Validation=/^[A-Za-z ]+$/.test(query.trim())
+     if(!Validation) return res.status(400).send({status : false, message : "Please Use Alphabets in college name"})
+    
+    let getDetails = await collegeModel.findOne({name:query}).select({name:1,fullName:1,logoLink:1,_id:1})
+    if(!getDetails) return res.status(400).send({status : false, message : "No such college found"})
+    
+    let collegeId=getDetails._id
+ 
+   
+    let internDetails = await internModel.find({collegeId:collegeId}).select({name:1,email:1,mobile:1})
+    if(internDetails.length==0) return res.status(400).send({status : false, message : `no interns found in ${query}`})
+    
+    let name = getDetails.name;
+    let  fullName = getDetails.fullName;
+    let  logoLink = getDetails.logoLink;
 
-        let collegeData = {
-            name: name,
-            fullName: fullName,
-            logoLink: logoLink,
-            intern: internDetails
-        }
-
-        res.status(200).send({ status: true, data: collegeData })
+    let  collegeData ={
+        name:name,
+        fullName:fullName,
+        logoLink:logoLink,
+        intern:internDetails
     }
-    catch (error) {
-        console.log(error.message)
-        res.status(500).send({ status: false, msg: error.message })
-    }
+    
+     
+   res.status(200).send({ status: true, data: collegeData})
+ 
+}  
+catch (error) {
+    console.log(error.message)
+    res.status(500).send({ status: false, message: error.message })
 }
-
+}
 module.exports = {
     createintern,
     getInterns
